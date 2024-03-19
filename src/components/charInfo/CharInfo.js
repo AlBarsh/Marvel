@@ -71,10 +71,14 @@ class CharInfo extends Component {
 
 const View = ({char}) => {
     const {name, description, thumbnail, homepage, wiki, comics} = char;
+    let imgStyle = {'objectFit' : 'cover'};
+    if (thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
+        imgStyle  = {'objectFit': 'contain'};
+    }
     return (
         <>
             <div className="char__basics">
-                    <img src={thumbnail} alt="abyss"/>
+                    <img src={thumbnail} alt="abyss" style={imgStyle}/>
                     <div>
                         <div className="char__info-name">{name}</div>
                         <div className="char__btns">
