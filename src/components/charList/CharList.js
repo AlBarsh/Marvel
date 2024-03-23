@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import MarvelService from '../../services/MarvelService';
 import './charList.scss';
-import abyss from '../../resources/img/abyss.jpg';
+
 
 class CharList extends Component {
     constructor(props) {
@@ -9,24 +9,45 @@ class CharList extends Component {
 
     }
     state = {
-        chars: []
+        chars: [],
+        offset: 210,
+        newItemLoading: false,
+        charsEnded: false
     }
     MarvelService = new MarvelService();
-    newChars = (chars) => {
-        this.setState({
-            chars
-        })
-    }
+  
     componentDidMount() {
-        this.MarvelService.getAllCaracters()
-        .then(this.newChars)
+        
+        this.onRequest()
         
     }
+    onRequest = (offset) => {
+        this.onCharListLoading();
+        this.MarvelService.getAllCaracters(offset)
+        .then(this.onCharListLoaded)
+    }
+    onCharListLoading = () => {
+        this.setState({
+            newItemLoading: true
+        })
+    }
+    onCharListLoaded = (newChars) => {
+        let ended = false;
+        if (newChars.length < 9) {
+            ended = true
+        }
 
+        this.setState(({offset, chars}) => ({
+            chars: [...chars, ...newChars],
+            newItemLoading: false,
+            charsEnded: ended,
+            offset: offset + 9
+        }))
+    }
     
     render() {
         console.log(this.state)
-        const {chars} = this.state;
+        const {chars, offset, newItemLoading, charsEnded} = this.state;
         
         const elements =chars.map(item => {
             let imgStyle = {'objectFit' : 'cover'};
@@ -45,7 +66,10 @@ class CharList extends Component {
                 {elements}
                    
                 </ul>
-                <button className="button button__main button__long">
+                <button className="button button__main button__long"
+                        onClick={() => this.onRequest(offset)}
+                        disabled={newItemLoading}
+                        style={{'display': charsEnded ? 'none' : 'block'}}>
                     <div className="inner">load more</div>
                 </button>
             </div>
