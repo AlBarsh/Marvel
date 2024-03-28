@@ -1,59 +1,52 @@
-import { Component } from 'react';
+import {useEffect, useState } from 'react';
 import './charInfo.scss';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../ErrorMassage/ErrorMassage';
 import Skeleton from  '../skeleton/Skeleton';
-import thor from '../../resources/img/thor.jpeg';
+import {PropTypes} from 'prop-types'
 import MarvelService from '../../services/MarvelService';
 
-class CharInfo extends Component {
-    state = {
-        char: null,
-        loading: false,
-        error: false,
-    }
-    marvelService = new MarvelService();
-    componentDidMount() {
-        this.updateChar();
-    }
-    componentDidUpdate(prevProps, prevState) {
-        if (this.props.charId !== prevProps.charId) {
-            this.updateChar()
-        }
-    }
-    updateChar = () => {
-        const {charId} = this.props;
+const CharInfo = (props) => {
+
+    const [char, setChar] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
+   
+    const marvelService = new MarvelService();
+
+
+    useEffect(() => {
+        updateChar()
+    }, [props.charId])
+    
+    const updateChar = () => {
+        const {charId} = props;
         if (!charId) {
             return
         } 
-        this.onCarLoading()
+        onCharLoading()
 
-        this.marvelService
+        marvelService
             .getCaracter(charId)
-            .then(this.onCharLoaded)
-            .catch(this.onError)
+            .then(onCharLoaded)
+            .catch(onError)
         
     }
-    onCharLoaded = (char) => {
-        this.setState({
-            char,
-            loading:false
-            
-        })
+    const onCharLoaded = (char) => {
+        setLoading(false);
+        setChar(char);
     }
-    onCarLoading = () => {
-        this.setState({
-            loading: true
-        })
+
+    const onCharLoading = () => {
+        setLoading(true);
     }
-    onError = () => {
-        this.setState({
-            loading:false,
-            error:true,
-        })
+
+    const onError = () => {
+        setError(true);
+        setLoading(false);
     }
-    render() {
-        const {char, loading, error} = this.state;
+    
+        
         const errorMessage = error ? <ErrorMessage/> : null;
         const spinner = loading ? <Spinner/> : null;
         const content = !(loading || error || !char) ? <View char={char}/> : null;
@@ -67,7 +60,7 @@ class CharInfo extends Component {
                 {content}
             </div>
         )
-    }
+    
 }
 
 const View = ({char}) => {
@@ -102,8 +95,8 @@ const View = ({char}) => {
                    
                     {
                      comics.map((item, i) => {
-                        if (i>9)return;
-                        if (comics) {}
+                        if (i>9) return;
+                         
                         return (
                             <li key = {i} className="char__comics-item">
                         {item.name} 
@@ -115,5 +108,10 @@ const View = ({char}) => {
                 </ul>
         </>
     )
+
+   
+}
+CharInfo.propTypes = {
+    charId: PropTypes.number
 }
 export default CharInfo;
