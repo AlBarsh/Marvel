@@ -1,53 +1,41 @@
 import {useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../ErrorMassage/ErrorMassage';
 import './charList.scss';
 
 const CharList = (props) => {
-    const [chars, setChars] = useState([]);
-    const [offset, setOffset] = useState(210);
+    const [chars, setCharList] = useState([]);
     const [newItemLoading, setNewItemLoading] = useState(false);
-    const [charsEnded, setCharsEnded] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-    
-    const marvelService = new MarvelService();
+    const [offset, setOffset] = useState(210);
+    const [charsEnded, setCharEnded] = useState(false);
+
+    const {loading, error, getAllCharacters} = useMarvelService();
 
     useEffect(() => {
-        console.log('effect');
-        onRequest()
+        onRequest(offset, true);
     }, [])
 
-    const onRequest = (offset) => {
-        onCharListLoading();
-        marvelService.getAllCaracters(offset)
+    const onRequest = (offset, initial) => {
+        initial ? setNewItemLoading(false) : setNewItemLoading(true);
+        getAllCharacters(offset)
             .then(onCharListLoaded)
-            .catch(onError)
-
-    }
-    const onCharListLoading = () => {
-        setCharsEnded(true);
-
     }
 
-    const onCharListLoaded = (newChars) => {
+    const onCharListLoaded = (newCharList) => {
         let ended = false;
-        if (newChars.length < 9) {
-            ended = true
-        };
+        if (newCharList.length < 9) {
+            ended = true;
+        }
 
-        setChars(chars => [...chars, ...newChars]);
+        setCharList(charList => [...charList, ...newCharList]);
         setNewItemLoading(newItemLoading => false);
-        setCharsEnded(charsEnded => ended);
-        setLoading(loading => false);
-        setOffset(offset => offset + 9)
+        setOffset(offset => offset + 9);
+        setCharEnded(charEnded => ended);
     }
-    const onError = () => {
-        setError(true);
-        setLoading(loading => false);
-    }
+
 
     const itemRefs = useRef([]);
 
